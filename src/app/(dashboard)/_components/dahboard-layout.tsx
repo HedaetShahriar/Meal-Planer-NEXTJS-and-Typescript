@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { motion } from "framer-motion";
@@ -113,7 +114,7 @@ type DashboardLayoutProps = {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex">
+    <div className="border-background fixed z-10 h-13 w-screen items-center justify-between border px-2">
       <Collapsible.Root open={open} onOpenChange={setOpen}>
         <Collapsible.Trigger asChild>
           <Button size="icon" variant="outline">
@@ -121,6 +122,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Button>
         </Collapsible.Trigger>
       </Collapsible.Root>
+      <div className="flex">
+        <DropdownMenu>
+            
+        </DropdownMenu>
+      </div>
 
       <Collapsible.Root
         className="fixed top-0 left-0 z-20 h-dvh"
