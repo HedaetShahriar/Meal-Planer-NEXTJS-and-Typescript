@@ -30,6 +30,7 @@ const CategoryCards = () => {
                 });
               }}
             >
+                
               <Trash />
             </Button>
           </div>
