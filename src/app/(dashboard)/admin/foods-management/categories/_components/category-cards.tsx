@@ -21,6 +21,7 @@ const CategoryCards = () => {
               <Edit />
             </Button>
             <Button
+            
               className="size-6"
               variant="ghost"
               size="icon"
@@ -30,7 +31,6 @@ const CategoryCards = () => {
                 });
               }}
             >
-                
               <Trash />
             </Button>
           </div>
