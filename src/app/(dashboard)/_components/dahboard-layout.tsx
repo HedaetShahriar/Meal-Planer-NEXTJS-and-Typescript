@@ -1,8 +1,17 @@
 "use client";
+import { Role } from "$/generated/prisma";
+import { useSignOut } from "@/app/(auth)/sign-in/_services/use-sign-in-mutations";
 import ThemeToggle from "@/components/theme-toogle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import customErrorMap from "@/lib/customErrorMap";
 import * as Collapsible from "@radix-ui/react-collapsible";
@@ -17,6 +26,7 @@ import {
   ChevronDown,
   LogOut,
 } from "lucide-react";
+import { Session } from "next-auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useState } from "react";
@@ -115,62 +125,78 @@ const RouteGroup = ({ group, items }: routeType) => {
 
 type DashboardLayoutProps = {
   children: ReactNode;
+  session: Session;
 };
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, session }: DashboardLayoutProps) => {
   const [open, setOpen] = useState(false);
+  const signOutMutation = useSignOut();
+  const userRole = session?.user?.role;
+
+  const handleLogout = () => {
+    signOutMutation.mutate();
+  };
+
+  const filteredRouteGroups = routeGroups.filter((group) => {
+    if (userRole === Role.ADMIN) {
+      return group.group === "Food Management";
+    } else {
+      return group.group === "Meal Management";
+    }
+  });
   return (
     <div className="flex">
-    <div className="bg-background fixed z-10 flex h-13 w-screen items-center justify-between border px-2">
-      <Collapsible.Root open={open} className="h-full" onOpenChange={setOpen}>
-        <Collapsible.Trigger className="mt-2" asChild>
-          <Button size="icon" variant="outline">
-            <Menu />
-          </Button>
-        </Collapsible.Trigger>
-      </Collapsible.Root>
-      <div className="flex gap-2">
-        <ThemeToggle />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex h-9 items-center gap-2 px-2"
-            >
-              <Avatar className="size-8">
-                <AvatarFallback>A</AvatarFallback>
-              </Avatar>
-              <span className="hidden md:inline">Admin</span>
+      <div className="bg-background fixed z-10 flex h-14 w-screen items-center justify-between border px-2">
+        <Collapsible.Root open={open} className="h-full" onOpenChange={setOpen}>
+          <Collapsible.Trigger className="mt-2" asChild>
+            <Button size="icon" variant="outline">
+              <Menu />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="flex items-center gap-3 px-2 py-1.5">
-              <Avatar className="size-8">
-                <AvatarFallback>A</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">Admin</span>
-                <span className="text-muted-foreground text-xs">
-                  admin@example.com
-                </span>
-              </div>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                console.log("Sign out");
-              }}
-              variant="destructive"
-            >
-              <LogOut className="size-4 ml-2" />
-                <span>Sign out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </Collapsible.Trigger>
+        </Collapsible.Root>
+        <div className="flex gap-2">
+          <ThemeToggle />
+
+          {session && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex h-9 items-center gap-2 px-2"
+                >
+                  <Avatar className="size-8">
+                    <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:inline">{session?.user?.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="flex items-center gap-3 px-2 py-1.5">
+                  <Avatar className="size-8">
+                    <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{session?.user?.name}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {session?.user?.email}
+                    </span>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  variant="destructive"
+                >
+                  <LogOut className="ml-2 size-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
-    </div>
 
       <Collapsible.Root
         className="fixed top-0 left-0 z-20 h-dvh"
@@ -196,7 +222,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
             <Separator className="my-2" />
             <div className="mt-4">
-              {routeGroups.map((group) => (
+              {filteredRouteGroups.map((group) => (
                 <RouteGroup key={group.group} {...group} />
               ))}
             </div>
