@@ -17,7 +17,7 @@ const createFood = async (data: FoodSchema) => {
         data: {
           name: validatedData.name,
           calories: toNumberSafe(validatedData.calories),
-          carbohydrates: toNumberSafe(validatedData.carbohydrates),
+          carbohydrates: toNumberSafe(validatedData.carboHydrates),
           fat: toNumberSafe(validatedData.fat),
           fiber: toNumberSafe(validatedData.fiber),
           sugar: toNumberSafe(validatedData.sugar),
@@ -51,7 +51,7 @@ const updateFood = async (data: FoodSchema) => {
           data: {
             name: validatedData.name,
             calories: toNumberSafe(validatedData.calories),
-            carbohydrates: toNumberSafe(validatedData.carbohydrates),
+            carbohydrates: toNumberSafe(validatedData.carboHydrates),
             fat: toNumberSafe(validatedData.fat),
             fiber: toNumberSafe(validatedData.fiber),
             sugar: toNumberSafe(validatedData.sugar),

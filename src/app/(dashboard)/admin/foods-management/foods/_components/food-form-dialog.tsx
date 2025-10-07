@@ -58,7 +58,8 @@ const FoodFormDialog = () => {
     if (!!selectedFoodId && foodQuery.data) {
       form.reset(foodQuery.data);
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFoodId, foodQuery.data]);
 
   const handleDialogOpenChange = (open: boolean) => {
     updateFoodDialogOpen(open);
