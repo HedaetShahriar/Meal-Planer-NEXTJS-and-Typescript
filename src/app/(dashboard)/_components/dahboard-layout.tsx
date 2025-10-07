@@ -47,7 +47,7 @@ const routeGroups: RouteGroupType[] = [
         icon: <Boxes className="mr-2 size-3" />,
       },
       {
-        href: "/admin/users-management/serving-units",
+        href: "/admin/foods-management/serving-units",
         label: "Serving Units",
         icon: <Ruler className="mr-2 size-3" />,
       },
@@ -67,7 +67,7 @@ const routeGroups: RouteGroupType[] = [
 
 type routeType = RouteGroupType;
 const RouteGroup = ({ group, items }: routeType) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const pathname = usePathname();
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>
