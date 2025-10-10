@@ -1,3 +1,4 @@
+"use server";
 import { auth } from "@/lib/auth";
 import {
   mealFiltersSchema,
@@ -12,7 +13,6 @@ const getMeals = async (filters: MealFiltersSchema) => {
   const validatedFilters = mealFiltersSchema.parse(filters);
 
   const session = await auth();
-
   const { dateTime } = validatedFilters || {};
 
   const where: Prisma.MealWhereInput = {};
@@ -20,36 +20,32 @@ const getMeals = async (filters: MealFiltersSchema) => {
   if (dateTime !== undefined) {
     const startDate = new Date(dateTime);
     startDate.setHours(0, 0, 0, 0);
-
     const endDate = new Date(dateTime);
     endDate.setHours(23, 59, 59, 999);
-    where.dateTime = {
-      gte: startDate,
-      lte: endDate,
-    };
+    where.dateTime = { gte: startDate, lte: endDate };
   }
 
   if (session?.user?.id) {
-    where.userId = {
-      equals: +session.user.id,
-    };
+    where.userId = { equals: +session.user.id };
   }
+
+//   console.log("🔍 Prisma where clause:", where);
 
   const data = await db.meal.findMany({
     where,
     orderBy: { dateTime: "desc" },
     include: {
       mealFoods: {
-        include: {
-          food: true,
-          servingUnit: true,
-        },
+        include: { food: true, servingUnit: true },
       },
     },
   });
 
+//   console.log("🍽️ Meals fetched:", data);
+
   return data;
 };
+
 
 const getMeal = async (id: number): Promise<MealSchema | null> => {
   const res = await db.meal.findFirst({

@@ -4,9 +4,14 @@ import { getMeal, getMeals } from "./mealQueries";
 
 const useMeals = () => {
   const { mealFilters } = useMealsStore();
+  // safely convert dateTime to ISO string only if it's a valid Date
+  const dateTimeKey =
+    mealFilters.dateTime && mealFilters.dateTime instanceof Date
+      ? mealFilters.dateTime.toISOString()
+      : undefined;
 
   return useQuery({
-    queryKey: ["meals", { dateTime: mealFilters.dateTime?.toISOString() }],
+    queryKey: ["meals", { dateTime: dateTimeKey }],
     queryFn: () => getMeals(mealFilters),
   });
 };

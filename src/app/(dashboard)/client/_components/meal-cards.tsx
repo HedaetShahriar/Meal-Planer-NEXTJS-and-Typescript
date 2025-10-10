@@ -18,30 +18,6 @@ import {
   Trash,
   Utensils,
 } from "lucide-react";
-import { Prisma } from "$/generated/prisma";
-
-// Type for meal with all related data
-type MealWithRelations = Prisma.MealGetPayload<{
-  include: {
-    mealFoods: {
-      include: {
-        food: true;
-        servingUnit: true;
-      };
-    };
-  };
-}>;
-
-type MealFood = MealWithRelations["mealFoods"][0];
-
-type NutritionTotals = {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  sugar: number;
-  fiber: number;
-};
 
 const MealCards = () => {
   const { updateSelectedMealId, updateMealDialogOpen, mealFilters } =
@@ -51,20 +27,18 @@ const MealCards = () => {
 
   const deleteMealMutation = useDeleteMeal();
 
-  const calculateTotalCalories = (mealFoods: MealFood[]): number => {
-    return mealFoods.reduce((total: number, mealFood: MealFood) => {
-      const foodCalories = (mealFood.food.calories || 0) * mealFood.amount;
+  const calculateTotalCalories = (mealFoods) => {
+    return mealFoods.reduce((total, mealFood) => {
+      const foodCalories = mealFood.food.calories * mealFood.amount || 0;
       return total + foodCalories;
     }, 0);
   };
 
-  const calculateNutritionTotals = (
-    meals: MealWithRelations[] | undefined,
-  ): NutritionTotals => {
+  const calculateNutritionTotals = (meals) => {
     return (
       meals?.reduce(
-        (totals: NutritionTotals, meal: MealWithRelations) => {
-          meal.mealFoods.forEach((mealFood: MealFood) => {
+        (totals, meal) => {
+          meal.mealFoods.forEach((mealFood) => {
             const multiplier = mealFood.amount || 1;
             totals.calories += (mealFood.food.calories || 0) * multiplier;
             totals.protein += (mealFood.food.protein || 0) * multiplier;
