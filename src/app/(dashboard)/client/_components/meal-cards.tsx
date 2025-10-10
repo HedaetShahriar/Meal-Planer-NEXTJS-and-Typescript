@@ -18,6 +18,30 @@ import {
   Trash,
   Utensils,
 } from "lucide-react";
+import { Prisma } from "$/generated/prisma";
+
+// Strongly-typed meal shape with related foods and serving units
+type MealWithRelations = Prisma.MealGetPayload<{
+  include: {
+    mealFoods: {
+      include: {
+        food: true;
+        servingUnit: true;
+      };
+    };
+  };
+}>;
+
+type MealFood = MealWithRelations["mealFoods"][0];
+
+type NutritionTotals = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sugar: number;
+  fiber: number;
+};
 
 const MealCards = () => {
   const { updateSelectedMealId, updateMealDialogOpen, mealFilters } =
@@ -27,25 +51,27 @@ const MealCards = () => {
 
   const deleteMealMutation = useDeleteMeal();
 
-  const calculateTotalCalories = (mealFoods) => {
-    return mealFoods.reduce((total, mealFood) => {
-      const foodCalories = mealFood.food.calories * mealFood.amount || 0;
-      return total + foodCalories;
+  const calculateTotalCalories = (mealFoods: MealFood[]): number => {
+    return mealFoods.reduce((total: number, mealFood: MealFood) => {
+      const caloriesPerUnit = mealFood.food.calories ?? 0;
+      return total + caloriesPerUnit * (mealFood.amount || 1);
     }, 0);
   };
 
-  const calculateNutritionTotals = (meals) => {
+  const calculateNutritionTotals = (
+    meals: MealWithRelations[] | undefined,
+  ): NutritionTotals => {
     return (
       meals?.reduce(
-        (totals, meal) => {
-          meal.mealFoods.forEach((mealFood) => {
+        (totals: NutritionTotals, meal: MealWithRelations) => {
+          meal.mealFoods.forEach((mealFood: MealFood) => {
             const multiplier = mealFood.amount || 1;
-            totals.calories += (mealFood.food.calories || 0) * multiplier;
-            totals.protein += (mealFood.food.protein || 0) * multiplier;
-            totals.carbs += (mealFood.food.carbohydrates || 0) * multiplier;
-            totals.fat += (mealFood.food.fat || 0) * multiplier;
-            totals.sugar += (mealFood.food.sugar || 0) * multiplier;
-            totals.fiber += (mealFood.food.fiber || 0) * multiplier;
+            totals.calories += (mealFood.food.calories ?? 0) * multiplier;
+            totals.protein += (mealFood.food.protein ?? 0) * multiplier;
+            totals.carbs += (mealFood.food.carbohydrates ?? 0) * multiplier;
+            totals.fat += (mealFood.food.fat ?? 0) * multiplier;
+            totals.sugar += (mealFood.food.sugar ?? 0) * multiplier;
+            totals.fiber += (mealFood.food.fiber ?? 0) * multiplier;
           });
           return totals;
         },
