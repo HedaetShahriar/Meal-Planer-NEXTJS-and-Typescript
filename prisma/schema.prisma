@@ -1,5 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -7,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -31,11 +29,11 @@ model Food {
   sugar            Float?
   foodServingUnits FoodServingUnit[]
   servingUnits     ServingUnit[]
-  category         Category?         @relation(fields: [categoryId], references: [id])
+  category         Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId       Int?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  Meal             Meal?             @relation(fields: [mealId], references: [id])
+  Meal             Meal?             @relation(fields: [mealId], references: [id], onDelete: SetNull)
   mealId           Int?
   MealFood         MealFood[]
 }
@@ -43,19 +41,18 @@ model Food {
 model ServingUnit {
   id              Int               @id @default(autoincrement())
   name            String            @unique
-  foodId          Int?              // add this
-  food            Food?             @relation(fields: [foodId], references: [id])
+  foodId          Int?
+  food            Food?             @relation(fields: [foodId], references: [id], onDelete: SetNull)
   foodServingUnit FoodServingUnit[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   MealFood        MealFood[]
 }
 
-
 model FoodServingUnit {
   id            Int         @id @default(autoincrement())
-  food          Food        @relation(fields: [foodId], references: [id])
-  servingUnit   ServingUnit @relation(fields: [servingUnitId], references: [id])
+  food          Food        @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  servingUnit   ServingUnit @relation(fields: [servingUnitId], references: [id], onDelete: Cascade)
   grams         Float?
   foodId        Int
   servingUnitId Int
@@ -83,7 +80,7 @@ model Meal {
   id        Int        @id @default(autoincrement())
   dateTime  DateTime
   foods     Food[]
-  user      User?      @relation(fields: [userId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   userId    Int?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -92,13 +89,13 @@ model Meal {
 
 model MealFood {
   id            Int         @id @default(autoincrement())
-  food          Food        @relation(fields: [foodId], references: [id])
-  meal          Meal        @relation(fields: [mealId], references: [id])
+  food          Food        @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  meal          Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  servingUnit   ServingUnit @relation(fields: [servingUnitId], references: [id], onDelete: SetNull)
   foodId        Int
   mealId        Int
+  servingUnitId Int
   amount        Float
-  servingUnit   ServingUnit @relation(fields: [servingUnitId], references: [id])
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  servingUnitId Int
 }
