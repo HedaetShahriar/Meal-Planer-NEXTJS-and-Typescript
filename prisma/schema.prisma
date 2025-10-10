@@ -43,13 +43,14 @@ model Food {
 model ServingUnit {
   id              Int               @id @default(autoincrement())
   name            String            @unique
-  foodServingUnit FoodServingUnit[]
+  foodId          Int?              // add this
   food            Food?             @relation(fields: [foodId], references: [id])
-  foodId          Int?
+  foodServingUnit FoodServingUnit[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   MealFood        MealFood[]
 }
+
 
 model FoodServingUnit {
   id            Int         @id @default(autoincrement())

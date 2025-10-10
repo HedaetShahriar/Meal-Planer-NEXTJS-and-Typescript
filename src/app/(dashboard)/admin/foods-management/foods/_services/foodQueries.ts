@@ -11,7 +11,7 @@ import { toStringSafe } from "@/lib/utils";
 
 type FoodWithServingUnits = Prisma.FoodGetPayload<{
   include: {
-    FoodServingUnit: true;
+    foodServingUnits: true;
   };
 }>;
 
@@ -81,7 +81,7 @@ const getFoods = async (
       skip,
       take: pageSize,
       include: {
-        FoodServingUnit: true,
+        foodServingUnits: true,
       },
     }),
   ]);
@@ -93,33 +93,32 @@ const getFoods = async (
     pageSize,
     totalPages: Math.ceil(total / pageSize),
   };
-}
+};
 
 const getFood = async (id: number): Promise<FoodSchema | null> => {
-    const res = await db.food.findFirst({
-            where: {id},
-            include: {
-                FoodServingUnit: true,
-            },
-        }
-    )
-    if (!res) return null;
-    return {
-        action: "update",
-        id,
-        name: res.name,
-        calories: toStringSafe(res.calories),
-        protein: toStringSafe(res.protein),
-        carboHydrates: toStringSafe(res.carbohydrates),
-        fat: toStringSafe(res.fat),
-        fiber: toStringSafe(res.fiber),
-        sugar: toStringSafe(res.sugar),
-        categoryId: toStringSafe(res.categoryId),
-        foodServingUnits: res.FoodServingUnit.map((unit) => ({
-            foodServingUnitId: toStringSafe(unit.servingUnitId),
-            grams: toStringSafe(unit.grams),
-        })),
-    };
-}
+  const res = await db.food.findFirst({
+    where: { id },
+    include: {
+      foodServingUnits: true,
+    },
+  });
+  if (!res) return null;
+  return {
+    action: "update",
+    id,
+    name: res.name,
+    calories: toStringSafe(res.calories),
+    protein: toStringSafe(res.protein),
+    carboHydrates: toStringSafe(res.carbohydrates),
+    fat: toStringSafe(res.fat),
+    fiber: toStringSafe(res.fiber),
+    sugar: toStringSafe(res.sugar),
+    categoryId: toStringSafe(res.categoryId),
+    foodServingUnits: res.foodServingUnits.map((unit) => ({
+      foodServingUnitId: toStringSafe(unit.servingUnitId),
+      grams: toStringSafe(unit.grams),
+    })),
+  };
+};
 
 export { getFoods, getFood };
